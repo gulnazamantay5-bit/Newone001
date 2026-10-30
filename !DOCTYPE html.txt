@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Гүлназ Амантай — Geography & GIS</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background:#08131c;
+    color:#f4f0e8;
+    overflow-x:hidden;
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+img{
+    max-width:100%;
+    display:block;
+}
+
+::selection{
+    background:#d7a86e;
+    color:#08131c;
+}
+
+
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+
+    background-size:70px 70px;
+    pointer-events:none;
+    z-index:-5;
+}
+
+.ambient{
+    position:fixed;
+    width:600px;
+    height:600px;
+    border-radius:50%;
+    filter:blur(120px);
+    opacity:.12;
+    pointer-events:none;
+    z-index:-4;
+}
+
+.ambient.one{
+    background:#d7a86e;
+    top:-250px;
+    left:-200px;
+}
+
+.ambient.two{
+    background:#158f9d;
+    right:-250px;
+    top:35%;
+}
+
+.ambient.three{
+    background:#3459a8;
+    left:20%;
+    bottom:-350px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.navbar{
+    position:fixed;
+    width:100%;
+    top:0;
+    left:0;
+    z-index:1000;
+
+    background:rgba(8,19,28,.72);
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.nav{
+    max-width:1200px;
+    margin:auto;
+
+    height:76px;
+
+    padding:0 28px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:#d7a86e;
+}
+
+.nav-links{
+    display:flex;
+    gap:28px;
+    align-items:center;
+}
+
+.nav-links a{
+    font-size:13px;
+    color:#aeb8bd;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#d7a86e;
+}
+
+.nav-number{
+    color:#d7a86e;
+    margin-right:5px;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:0 28px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+    min-height:100vh;
+
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+
+    align-items:center;
+    gap:60px;
+
+    padding-top:90px;
+}
+
+.hero-kicker{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    color:#d7a86e;
+
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+
+    margin-bottom:25px;
+}
+
+.hero-kicker::before{
+    content:"";
+    width:40px;
+    height:1px;
+    background:#d7a86e;
+}
+
+.hero h1{
+    font-size:clamp(58px,8vw,112px);
+    line-height:.87;
+
+    letter-spacing:-7px;
+
+    margin-bottom:35px;
+}
+
+.hero h1 .gold{
+    color:#d7a86e;
+}
+
+.hero h1 .outline{
+    color:transparent;
+    -webkit-text-stroke:1px #d7a86e;
+}
+
+.hero-description{
+    max-width:620px;
+
+    color:#aeb8bd;
+
+    font-size:18px;
+    line-height:1.8;
+
+    margin-bottom:35px;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.button{
+    padding:14px 22px;
+
+    border-radius:3px;
+
+    font-size:13px;
+    font-weight:600;
+
+    transition:.35s;
+}
+
+.button-primary{
+    background:#d7a86e;
+    color:#08131c;
+}
+
+.button-primary:hover{
+    transform:translateY(-4px);
+    box-shadow:0 15px 35px rgba(215,168,110,.2);
+}
+
+.button-secondary{
+    border:1px solid rgba(255,255,255,.15);
+    color:#f4f0e8;
+}
+
+.button-secondary:hover{
+    border-color:#d7a86e;
+    color:#d7a86e;
+}
+
+
+/* =========================================================
+   HERO MAP
+========================================================= */
+
+.hero-visual{
+    position:relative;
+    height:540px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.map-frame{
+    width:440px;
+    height:440px;
+
+    border-radius:50%;
+
+    border:1px solid rgba(215,168,110,.35);
+
+    position:relative;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    box-shadow:
+        0 0 0 35px rgba(215,168,110,.025),
+        0 0 0 70px rgba(215,168,110,.015),
+        inset 0 0 80px rgba(21,143,157,.08);
+
+    animation:slowFloat 7s ease-in-out infinite;
+}
+
+.map-frame::before{
+    content:"";
+
+    position:absolute;
+
+    width:75%;
+    height:100%;
+
+    border-left:1px solid rgba(215,168,110,.2);
+    border-right:1px solid rgba(215,168,110,.2);
+
+    border-radius:50%;
+}
+
+.map-frame::after{
+    content:"";
+
+    position:absolute;
+
+    width:100%;
+    height:40%;
+
+    border-top:1px solid rgba(215,168,110,.2);
+    border-bottom:1px solid rgba(215,168,110,.2);
+
+    border-radius:50%;
+}
+
+.map-inner{
+    width:80%;
+    height:80%;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle at 30% 30%,
+            rgba(215,168,110,.15),
+            transparent 45%
+        ),
+        linear-gradient(
+            145deg,
+            #102735,
+            #0b1924
+        );
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+}
+
+.map-inner span{
+    font-size:105px;
+    filter:grayscale(.2);
+}
+
+.coordinates{
+    position:absolute;
+
+    font-family:monospace;
+
+    color:#6e838e;
+
+    font-size:10px;
+}
+
+.coordinates.top{
+    top:25px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.coordinates.bottom{
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.coordinates.left{
+    left:-35px;
+    top:50%;
+    transform:rotate(-90deg);
+}
+
+.coordinates.right{
+    right:-35px;
+    top:50%;
+    transform:rotate(90deg);
+}
+
+.map-label{
+    position:absolute;
+    right:-20px;
+    bottom:60px;
+
+    padding:15px 18px;
+
+    background:#10222d;
+    border:1px solid rgba(215,168,110,.2);
+
+    font-size:11px;
+    letter-spacing:1px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+.map-label strong{
+    display:block;
+    color:#d7a86e;
+    font-size:16px;
+    margin-bottom:4px;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+
+    border-top:1px solid rgba(255,255,255,.1);
+    border-bottom:1px solid rgba(255,255,255,.1);
+
+    padding:30px 0;
+
+    margin-bottom:100px;
+}
+
+.stat{
+    padding:10px 25px;
+
+    border-right:1px solid rgba(255,255,255,.08);
+}
+
+.stat:last-child{
+    border-right:none;
+}
+
+.stat-number{
+    font-size:38px;
+    font-weight:800;
+
+    color:#d7a86e;
+}
+
+.stat-label{
+    color:#71818a;
+    font-size:12px;
+    margin-top:4px;
+}
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+.section{
+    padding:120px 0;
+}
+
+.section-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+
+    margin-bottom:55px;
+}
+
+.section-kicker{
+    color:#d7a86e;
+
+    font-size:11px;
+    letter-spacing:3px;
+
+    text-transform:uppercase;
+
+    margin-bottom:12px;
+}
+
+.section-title{
+    font-size:52px;
+    line-height:1;
+
+    letter-spacing:-2px;
+}
+
+.section-description{
+    max-width:400px;
+
+    color:#7f9098;
+
+    font-size:14px;
+    line-height:1.8;
+}
+
+
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.about-grid{
+    display:grid;
+    grid-template-columns:.8fr 1.2fr;
+    gap:25px;
+}
+
+.about-photo{
+    min-height:500px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #17313c,
+            #0d1c26
+        );
+
+    border:1px solid rgba(255,255,255,.08);
+
+    position:relative;
+    overflow:hidden;
+}
+
+.about-photo::before{
+    content:"";
+
+    position:absolute;
+    inset:25px;
+
+    border:1px solid rgba(215,168,110,.2);
+}
+
+.about-photo-content{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-direction:column;
+
+    text-align:center;
+}
+
+.about-photo-content .initials{
+    font-size:90px;
+    font-weight:800;
+
+    color:#d7a86e;
+}
+
+.about-photo-content small{
+    color:#71818a;
+    letter-spacing:3px;
+}
+
+.photo-note{
+    position:absolute;
+    bottom:25px;
+    left:25px;
+
+    font-size:10px;
+    color:#667984;
+
+    letter-spacing:1px;
+}
+
+.about-content{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.info-card{
+    padding:28px;
+
+    background:rgba(255,255,255,.035);
+
+    border:1px solid rgba(255,255,255,.07);
+
+    transition:.3s;
+}
+
+.info-card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(215,168,110,.3);
+}
+
+.info-icon{
+    font-size:25px;
+    margin-bottom:25px;
+}
+
+.info-card h3{
+    font-size:17px;
+    margin-bottom:10px;
+}
+
+.info-card p{
+    color:#84949c;
+    font-size:13px;
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+.timeline{
+    position:relative;
+
+    max-width:850px;
+
+    margin:auto;
+}
+
+.timeline::before{
+    content:"";
+
+    position:absolute;
+
+    left:20px;
+    top:0;
+    bottom:0;
+
+    width:1px;
+
+    background:rgba(215,168,110,.25);
+}
+
+.timeline-item{
+    position:relative;
+
+    padding-left:70px;
+
+    margin-bottom:55px;
+}
+
+.timeline-dot{
+    position:absolute;
+
+    left:13px;
+    top:3px;
+
+    width:15px;
+    height:15px;
+
+    border-radius:50%;
+
+    background:#d7a86e;
+
+    box-shadow:0 0 0 7px rgba(215,168,110,.08);
+}
+
+.timeline-year{
+    color:#d7a86e;
+
+    font-size:12px;
+    letter-spacing:2px;
+
+    margin-bottom:8px;
+}
+
+.timeline-item h3{
+    font-size:23px;
+    margin-bottom:8px;
+}
+
+.timeline-item p{
+    color:#84949c;
+    font-size:14px;
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   RESEARCH FEATURE
+========================================================= */
+
+.research-feature{
+    background:
+        linear-gradient(
+            135deg,
+            rgba(215,168,110,.09),
+            rgba(21,143,157,.04)
+        );
+
+    border:1px solid rgba(215,168,110,.18);
+
+    padding:55px;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.research-feature::after{
+    content:"01";
+
+    position:absolute;
+
+    right:-20px;
+    top:-55px;
+
+    font-size:240px;
+
+    font-weight:900;
+
+    color:rgba(215,168,110,.035);
+}
+
+.research-tag{
+    display:inline-block;
+
+    color:#d7a86e;
+
+    border:1px solid rgba(215,168,110,.25);
+
+    padding:7px 12px;
+
+    font-size:10px;
+    letter-spacing:2px;
+
+    margin-bottom:25px;
+}
+
+.research-title{
+    font-size:42px;
+
+    max-width:850px;
+
+    line-height:1.1;
+
+    margin-bottom:25px;
+}
+
+.research-text{
+    max-width:760px;
+
+    color:#8d9ba2;
+
+    line-height:1.9;
+
+    font-size:15px;
+}
+
+.research-bottom{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+
+    gap:15px;
+
+    margin-top:45px;
+}
+
+.research-item{
+    border-top:1px solid rgba(255,255,255,.1);
+
+    padding-top:15px;
+}
+
+.research-item span{
+    display:block;
+
+    color:#d7a86e;
+
+    font-size:20px;
+    font-weight:bold;
+
+    margin-bottom:5px;
+}
+
+.research-item small{
+    color:#6f8089;
+}
+
+
+/* =========================================================
+   GIS SKILLS
+========================================================= */
+
+.gis-grid{
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+}
+
+.gis-card{
+    min-height:230px;
+
+    padding:30px;
+
+    border:1px solid rgba(255,255,255,.07);
+
+    background:rgba(255,255,255,.025);
+
+    position:relative;
+
+    transition:.35s;
+}
+
+.gis-card:hover{
+    transform:translateY(-8px);
+
+    background:rgba(215,168,110,.05);
+
+    border-color:rgba(215,168,110,.3);
+}
+
+.gis-number{
+    position:absolute;
+
+    right:20px;
+    top:15px;
+
+    color:rgba(255,255,255,.08);
+
+    font-size:45px;
+    font-weight:800;
+}
+
+.gis-icon{
+    font-size:32px;
+    margin-bottom:30px;
+}
+
+.gis-card h3{
+    margin-bottom:10px;
+}
+
+.gis-card p{
+    color:#75868f;
+
+    font-size:13px;
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   PROJECTS
+========================================================= */
+
+.projects{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:20px;
+}
+
+.project{
+    min-height:360px;
+
+    position:relative;
+
+    padding:30px;
+
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    background:#0d1d27;
+
+    transition:.4s;
+}
+
+.project:hover{
+    transform:translateY(-8px);
+}
+
+.project.large{
+    min-height:430px;
+}
+
+.project-map{
+    height:210px;
+
+    margin-bottom:25px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        );
+
+    background-size:35px 35px;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    position:relative;
+}
+
+.project-map span{
+    font-size:70px;
+    opacity:.7;
+}
+
+.project-category{
+    color:#d7a86e;
+
+    font-size:10px;
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+
+    margin-bottom:10px;
+}
+
+.project h3{
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.project p{
+    color:#778992;
+
+    font-size:13px;
+    line-height:1.7;
+}
+
+.project-arrow{
+    position:absolute;
+
+    right:25px;
+    bottom:25px;
+
+    width:40px;
+    height:40px;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#d7a86e;
+}
+
+
+/* =========================================================
+   METHODS
+========================================================= */
+
+.methods{
+    display:grid;
+
+    grid-template-columns:repeat(5,1fr);
+
+    gap:10px;
+}
+
+.method{
+    padding:22px 15px;
+
+    border:1px solid rgba(255,255,255,.07);
+
+    text-align:center;
+
+    transition:.3s;
+}
+
+.method:hover{
+    background:#d7a86e;
+    color:#08131c;
+}
+
+.method strong{
+    display:block;
+
+    font-size:16px;
+
+    margin-bottom:7px;
+}
+
+.method span{
+    color:#71818a;
+
+    font-size:10px;
+}
+
+.method:hover span{
+    color:#08131c;
+}
+
+
+/* =========================================================
+   INTERESTS
+========================================================= */
+
+.interests{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+}
+
+.interest{
+    padding:12px 18px;
+
+    border-radius:30px;
+
+    border:1px solid rgba(255,255,255,.1);
+
+    color:#b4c0c5;
+
+    font-size:12px;
+
+    transition:.3s;
+}
+
+.interest:hover{
+    border-color:#d7a86e;
+    color:#d7a86e;
+}
+
+
+/* =========================================================
+   CONTACT
+========================================================= */
+
+.contact{
+    text-align:center;
+
+    padding:120px 30px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+.contact h2{
+    font-size:65px;
+
+    letter-spacing:-3px;
+
+    margin-bottom:20px;
+}
+
+.contact p{
+    color:#7c8d95;
+
+    max-width:550px;
+
+    margin:0 auto 35px;
+
+    line-height:1.8;
+}
+
+.contact-links{
+    display:flex;
+
+    justify-content:center;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+}
+
+.contact-link{
+    padding:13px 20px;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    font-size:12px;
+
+    transition:.3s;
+}
+
+.contact-link:hover{
+    border-color:#d7a86e;
+    color:#d7a86e;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+    border-top:1px solid rgba(255,255,255,.08);
+
+    padding:30px 0;
+
+    color:#566872;
+
+    font-size:11px;
+
+    display:flex;
+
+    justify-content:space-between;
+}
+
+footer strong{
+    color:#d7a86e;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes slowFloat{
+
+    0%,100%{
+        transform:translateY(0) rotate(0deg);
+    }
+
+    50%{
+        transform:translateY(-12px) rotate(1deg);
+    }
+}
+
+@keyframes appear{
+
+    from{
+        opacity:0;
+        transform:translateY(30px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.hero-text{
+    animation:appear 1s ease forwards;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:900px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .hero{
+        grid-template-columns:1fr;
+        padding-top:130px;
+    }
+
+    .hero-visual{
+        height:400px;
+    }
+
+    .map-frame{
+        width:330px;
+        height:330px;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+        gap:20px;
+    }
+
+    .stat:nth-child(2){
+        border-right:none;
+    }
+
+    .about-grid{
+        grid-template-columns:1fr;
+    }
+
+    .gis-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .methods{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+}
+
+@media(max-width:600px){
+
+    .container{
+        padding:0 18px;
+    }
+
+    .hero h1{
+        font-size:58px;
+        letter-spacing:-4px;
+    }
+
+    .hero-description{
+        font-size:15px;
+    }
+
+    .map-frame{
+        width:280px;
+        height:280px;
+    }
+
+    .map-inner span{
+        font-size:75px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .stat{
+        border-right:none;
+        padding:10px;
+    }
+
+    .section{
+        padding:80px 0;
+    }
+
+    .section-header{
+        display:block;
+    }
+
+    .section-title{
+        font-size:38px;
+    }
+
+    .section-description{
+        margin-top:20px;
+    }
+
+    .about-content{
+        grid-template-columns:1fr;
+    }
+
+    .gis-grid{
+        grid-template-columns:1fr;
+    }
+
+    .projects{
+        grid-template-columns:1fr;
+    }
+
+    .research-feature{
+        padding:30px 22px;
+    }
+
+    .research-title{
+        font-size:30px;
+    }
+
+    .research-bottom{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .methods{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .contact h2{
+        font-size:45px;
+    }
+
+    footer{
+        display:block;
+        text-align:center;
+        line-height:2;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="ambient one"></div>
+<div class="ambient two"></div>
+<div class="ambient three"></div>
+
+
+<!-- =====================================================
+     NAV
+===================================================== -->
+
+<header class="navbar">
+
+<div class="nav">
+
+    <div class="logo">
+        G<span>A</span>
+    </div>
+
+    <div class="nav-links">
+
+        <a href="#about">
+            <span class="nav-number">01</span>
+            Мен туралы
+        </a>
+
+        <a href="#research">
+            <span class="nav-number">02</span>
+            Зерттеу
+        </a>
+
+        <a href="#gis">
+            <span class="nav-number">03</span>
+            GIS
+        </a>
+
+        <a href="#projects">
+            <span class="nav-number">04</span>
+            Жобалар
+        </a>
+
+        <a href="#contact">
+            <span class="nav-number">05</span>
+            Байланыс
+        </a>
+
+    </div>
+
+</div>
+
+</header>
+
+
+
+<main class="container">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+<div class="hero-text">
+
+    <div class="hero-kicker">
+        Geography · GIS · Research
+    </div>
+
+
+    <h1>
+
+        Гүлназ
+
+        <span class="gold">
+            Амантай
+        </span>
+
+        <br>
+
+        <span class="outline">
+            GEOGRAPHY
+        </span>
+
+    </h1>
+
+
+    <p class="hero-description">
+
+        География магистранты, зерттеуші және
+        GIS технологияларымен жұмыс істейтін жас маман.
+        Табиғи ландшафттарды картадан ғана емес,
+        олардың кеңістіктік құрылымы мен даму заңдылықтары
+        арқылы зерттеймін.
+
+    </p>
+
+
+    <div class="hero-buttons">
+
+        <a href="#research"
+           class="button button-primary">
+
+            Менің зерттеуім →
+
+        </a>
+
+
+        <a href="#about"
+           class="button button-secondary">
+
+            Мен туралы
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<div class="hero-visual">
+
+    <div class="map-frame">
+
+        <div class="coordinates top">
+            44°12′51″ N
+        </div>
+
+        <div class="coordinates bottom">
+            51°16′28″ E
+        </div>
+
+        <div class="coordinates left">
+            MANGYSTAU
+        </div>
+
+        <div class="coordinates right">
+            CASPIAN SEA
+        </div>
+
+
+        <div class="map-inner">
+
+            <span>🏜️</span>
+
+        </div>
+
+
+        <div class="map-label">
+
+            <strong>MANGYSTAU</strong>
+
+            LANDSCAPE RESEARCH
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     STATS
+===================================================== -->
+
+<div class="stats">
+
+    <div class="stat">
+
+        <div class="stat-number">
+            01
+        </div>
+
+        <div class="stat-label">
+            Негізгі ғылыми зерттеу
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-number">
+            GIS
+        </div>
+
+        <div class="stat-label">
+            Негізгі жұмыс бағыты
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-number">
+            02+
+        </div>
+
+        <div class="stat-label">
+            Геоақпараттық платформалар
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-number">
+            10+
+        </div>
+
+        <div class="stat-label">
+            Зерттеу әдістері
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ABOUT
+===================================================== -->
+
+<section class="section" id="about">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            01 — About
+        </div>
+
+        <h2 class="section-title">
+            Мен туралы
+        </h2>
+
+    </div>
+
+
+    <p class="section-description">
+
+        География, картография және заманауи
+        геоақпараттық технологияларды біріктіретін
+        ғылыми бағыт.
+
+    </p>
+
+</div>
+
+
+
+<div class="about-grid">
+
+
+    <div class="about-photo">
+
+        <div class="about-photo-content">
+
+            <div class="initials">
+                GA
+            </div>
+
+            <small>
+                GEOGRAPHY · RESEARCH
+            </small>
+
+        </div>
+
+
+        <div class="photo-note">
+            PHOTO WILL BE ADDED HERE
+        </div>
+
+    </div>
+
+
+
+    <div class="about-content">
+
+
+        <div class="info-card">
+
+            <div class="info-icon">
+                🎓
+            </div>
+
+            <h3>
+                Білім
+            </h3>
+
+            <p>
+                География бағыты бойынша
+                магистратурада білім алып жатырмын.
+            </p>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-icon">
+                🗺️
+            </div>
+
+            <h3>
+                Мамандығым
+            </h3>
+
+            <p>
+                Физикалық география,
+                ландшафттану және картография.
+            </p>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-icon">
+                🛰️
+            </div>
+
+            <h3>
+                GIS
+            </h3>
+
+            <p>
+                ArcGIS, QGIS, Google Earth Engine
+                және спутниктік деректермен жұмыс.
+            </p>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-icon">
+                🔬
+            </div>
+
+            <h3>
+                Research
+            </h3>
+
+            <p>
+                Табиғи ландшафттардың құрылымы,
+                кеңістіктік дифференциациясы
+                және геоэкологиялық жағдайы.
+            </p>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     EDUCATION
+===================================================== -->
+
+<section class="section">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            02 — Education
+        </div>
+
+        <h2 class="section-title">
+            Білім жолым
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<div class="timeline">
+
+
+    <div class="timeline-item">
+
+        <div class="timeline-dot"></div>
+
+        <div class="timeline-year">
+            HIGHER EDUCATION
+        </div>
+
+        <h3>
+            География
+        </h3>
+
+        <p>
+            География саласында кәсіби білім қалыптастырып,
+            физикалық-географиялық процестер мен табиғи
+            кешендерді зерттеуге бағыт алдым.
+        </p>
+
+    </div>
+
+
+    <div class="timeline-item">
+
+        <div class="timeline-dot"></div>
+
+        <div class="timeline-year">
+            MASTER'S DEGREE
+        </div>
+
+        <h3>
+            7M05213 — География
+        </h3>
+
+        <p>
+            Магистратура деңгейінде ғылыми-зерттеу
+            жұмысын жүргізіп, ландшафттық құрылым мен
+            GIS технологияларын зерттеу жұмысына енгізіп келемін.
+        </p>
+
+    </div>
+
+
+    <div class="timeline-item">
+
+        <div class="timeline-dot"></div>
+
+        <div class="timeline-year">
+            CURRENT RESEARCH
+        </div>
+
+        <h3>
+            Маңғыстау түбегінің ландшафттары
+        </h3>
+
+        <p>
+            Қазіргі ғылыми жұмысым Маңғыстау түбегінің
+            ландшафттық құрылымдық ерекшеліктерін
+            зерттеуге арналған.
+        </p>
+
+    </div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     RESEARCH
+===================================================== -->
+
+<section class="section" id="research">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            03 — Research
+        </div>
+
+        <h2 class="section-title">
+            Негізгі зерттеу
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<div class="research-feature">
+
+
+    <div class="research-tag">
+        MASTER'S THESIS
+    </div>
+
+
+    <h2 class="research-title">
+
+        Маңғыстау түбегінің
+        ландшафттық құрылымдық
+        ерекшеліктері
+
+    </h2>
+
+
+    <p class="research-text">
+
+        Зерттеу жұмысы Маңғыстау түбегінің табиғи
+        жағдайларын, ландшафттық құрылымын,
+        кеңістіктік дифференциациясын және қазіргі
+        геоэкологиялық жағдайын зерттеуге бағытталған.
+
+        Зерттеу барысында физикалық-географиялық
+        талдау, GIS технологиялары, қашықтан зондтау
+        деректері және спутниктік суреттер пайдаланылады.
+
+    </p>
+
+
+    <div class="research-bottom">
+
+
+        <div class="research-item">
+
+            <span>
+                GIS
+            </span>
+
+            <small>
+                Кеңістіктік талдау
+            </small>
+
+        </div>
+
+
+        <div class="research-item">
+
+            <span>
+                RS
+            </span>
+
+            <small>
+                Remote Sensing
+            </small>
+
+        </div>
+
+
+        <div class="research-item">
+
+            <span>
+                NDVI
+            </span>
+
+            <small>
+                Өсімдік жамылғысы
+            </small>
+
+        </div>
+
+
+        <div class="research-item">
+
+            <span>
+                DEM
+            </span>
+
+            <small>
+                Жер бедері
+            </small>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     GIS
+===================================================== -->
+
+<section class="section" id="gis">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            04 — GIS & Remote Sensing
+        </div>
+
+        <h2 class="section-title">
+            GIS зертханасы
+        </h2>
+
+    </div>
+
+
+    <p class="section-description">
+
+        Кеңістіктік деректерді өңдеу,
+        талдау және картографиялық
+        визуализация.
+
+    </p>
+
+</div>
+
+
+
+<div class="gis-grid">
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            01
+        </div>
+
+        <div class="gis-icon">
+            🗺️
+        </div>
+
+        <h3>
+            ArcGIS
+        </h3>
+
+        <p>
+            Кеңістіктік деректерді өңдеу,
+            геодеректер базасы, картография
+            және raster analysis.
+        </p>
+
+    </div>
+
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            02
+        </div>
+
+        <div class="gis-icon">
+            🌐
+        </div>
+
+        <h3>
+            QGIS
+        </h3>
+
+        <p>
+            Ашық кодты GIS ортасында
+            кеңістіктік деректерді визуализациялау
+            және талдау.
+        </p>
+
+    </div>
+
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            03
+        </div>
+
+        <div class="gis-icon">
+            🛰️
+        </div>
+
+        <h3>
+            Google Earth Engine
+        </h3>
+
+        <p>
+            Sentinel және Landsat спутниктік
+            деректерін өңдеу және
+            индекстерді есептеу.
+        </p>
+
+    </div>
+
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            04
+        </div>
+
+        <div class="gis-icon">
+            🌱
+        </div>
+
+        <h3>
+            NDVI
+        </h3>
+
+        <p>
+            Өсімдік жамылғысының
+            кеңістіктік таралуын
+            бағалау.
+        </p>
+
+    </div>
+
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            05
+        </div>
+
+        <div class="gis-icon">
+            💧
+        </div>
+
+        <h3>
+            NDWI
+        </h3>
+
+        <p>
+            Су нысандарын анықтау және
+            олардың кеңістіктік жағдайын
+            талдау.
+        </p>
+
+    </div>
+
+
+
+    <div class="gis-card">
+
+        <div class="gis-number">
+            06
+        </div>
+
+        <div class="gis-icon">
+            ⛰️
+        </div>
+
+        <h3>
+            DEM / SRTM
+        </h3>
+
+        <p>
+            Жер бедерінің сандық моделін
+            пайдаланып морфометриялық
+            талдау жүргізу.
+        </p>
+
+    </div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PROJECTS
+===================================================== -->
+
+<section class="section" id="projects">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            05 — Projects
+        </div>
+
+        <h2 class="section-title">
+            Жобаларым
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<div class="projects">
+
+
+    <div class="project large">
+
+        <div class="project-map">
+            <span>🏜️</span>
+        </div>
+
+        <div class="project-category">
+            Landscape Research
+        </div>
+
+        <h3>
+            Маңғыстау ландшафттары
+        </h3>
+
+        <p>
+            Маңғыстау түбегінің ландшафттық
+            құрылымын зерттеу және
+            ландшафттық карта жасау.
+        </p>
+
+        <div class="project-arrow">
+            →
+        </div>
+
+    </div>
+
+
+
+    <div class="project large">
+
+        <div class="project-map">
+            <span>🛰️</span>
+        </div>
+
+        <div class="project-category">
+            Remote Sensing
+        </div>
+
+        <h3>
+            Спутниктік мониторинг
+        </h3>
+
+        <p>
+            Landsat және Sentinel-2 деректері
+            негізінде табиғи компоненттердің
+            кеңістіктік өзгерістерін зерттеу.
+        </p>
+
+        <div class="project-arrow">
+            →
+        </div>
+
+    </div>
+
+
+
+    <div class="project">
+
+        <div class="project-map">
+            <span>🗺️</span>
+        </div>
+
+        <div class="project-category">
+            Cartography
+        </div>
+
+        <h3>
+            Тақырыптық карталар
+        </h3>
+
+        <p>
+            Табиғи және әлеуметтік-экономикалық
+            нысандардың тақырыптық карталарын
+            құрастыру.
+        </p>
+
+        <div class="project-arrow">
+            →
+        </div>
+
+    </div>
+
+
+
+    <div class="project">
+
+        <div class="project-map">
+            <span>🌍</span>
+        </div>
+
+        <div class="project-category">
+            Geoecology
+        </div>
+
+        <h3>
+            Геоэкологиялық зерттеулер
+        </h3>
+
+        <p>
+            Шөлейттену, табиғи ресурстар және
+            ландшафттардың қазіргі экологиялық
+            жағдайын бағалау.
+        </p>
+
+        <div class="project-arrow">
+            →
+        </div>
+
+    </div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     METHODS
+===================================================== -->
+
+<section class="section">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            06 — Methods
+        </div>
+
+        <h2 class="section-title">
+            Зерттеу әдістері
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<div class="methods">
+
+
+    <div class="method">
+
+        <strong>GIS</strong>
+        <span>Spatial analysis</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>RS</strong>
+        <span>Remote sensing</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>NDVI</strong>
+        <span>Vegetation</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>NDWI</strong>
+        <span>Water</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>DEM</strong>
+        <span>Terrain</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>SRTM</strong>
+        <span>Elevation</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>Landsat</strong>
+        <span>Satellite data</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>Sentinel</strong>
+        <span>Satellite data</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>Raster</strong>
+        <span>Analysis</span>
+
+    </div>
+
+
+    <div class="method">
+
+        <strong>Cartography</strong>
+        <span>Mapping</span>
+
+    </div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     INTERESTS
+===================================================== -->
+
+<section class="section">
+
+<div class="section-header">
+
+    <div>
+
+        <div class="section-kicker">
+            07 — Interests
+        </div>
+
+        <h2 class="section-title">
+            Ғылыми қызығушылықтар
+        </h2>
+
+    </div>
+
+</div>
+
+
+
+<div class="interests">
+
+    <div class="interest">
+        Ландшафттану
+    </div>
+
+    <div class="interest">
+        Физикалық география
+    </div>
+
+    <div class="interest">
+        Геоақпараттық жүйелер
+    </div>
+
+    <div class="interest">
+        Қашықтан зондтау
+    </div>
+
+    <div class="interest">
+        Картография
+    </div>
+
+    <div class="interest">
+        Шөлейттену
+    </div>
+
+    <div class="interest">
+        Геоэкология
+    </div>
+
+    <div class="interest">
+        Табиғи ресурстар
+    </div>
+
+    <div class="interest">
+        Спутниктік мониторинг
+    </div>
+
+    <div class="interest">
+        Кеңістіктік талдау
+    </div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CONTACT
+===================================================== -->
+
+<section class="contact" id="contact">
+
+    <div class="section-kicker">
+        08 — Contact
+    </div>
+
+
+    <h2>
+        Байланыс
+    </h2>
+
+
+    <p>
+
+        Ғылыми зерттеу, GIS жобалары немесе
+        география тақырыбындағы идеялар бойынша
+        байланысуға болады.
+
+    </p>
+
+
+    <div class="contact-links">
+
+        <a href="#" class="contact-link">
+            Instagram
+        </a>
+
+        <a href="#" class="contact-link">
+            Telegram
+        </a>
+
+        <a href="mailto:your@email.com"
+           class="contact-link">
+
+            Email
+
+        </a>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="container">
+
+    <div>
+
+        © 2026
+        <strong>Гүлназ Амантай</strong>
+
+    </div>
+
+
+    <div>
+
+        GEOGRAPHY · GIS · RESEARCH
+
+    </div>
+
+</footer>
+
+
+</body>
+</html>
